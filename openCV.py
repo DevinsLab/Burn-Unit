@@ -12,9 +12,11 @@ rawCapture = PiRGBArray(camera, size = (640, 480))
 
 time.sleep(0.1)
 
+#obtain camera input array
 for frame in camera.capture_continuous(rawCapture, format = "bgr", use_video_port = True):
     image_preview = frame.array
 
+    #generate preview window
     cv2.imshow("Frame", image_preview)
     key = cv2.waitKey(1) & 0xFF
 
@@ -27,10 +29,7 @@ for frame in camera.capture_continuous(rawCapture, format = "bgr", use_video_por
         time.sleep(.1)
         cv2.destroyAllWindows()
 
-    if key == ord("r"):
-        cv2.imshow("Frame", image_preview)
-        rawCapture.truncate(0)
-
+    #exit program
     if key == ord("f"):
         cv2.destroyAllWindows()
         break
