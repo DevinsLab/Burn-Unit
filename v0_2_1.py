@@ -143,9 +143,9 @@ def toggle_LED_wrapper():
     # Calls toggle_LED
     toggle_LED()
 
-def toggle_LED(LED):
+def toggle_LED():
     LED_state = not LED_state
-    GPIO.output(LED, LED_state)
+    GPIO.output(12, LED_state)
 
 def init_GPIO():
     GPIO.setmode(GPIO.BOARD)
