@@ -150,7 +150,6 @@ def toggle_LED():
 def init_GPIO():
     GPIO.setmode(GPIO.BOARD)
     GPIO.setup(12,GPIO.OUT)
-    LED_state=False
     
 if __name__ == "__main__":
     import sys
@@ -160,6 +159,8 @@ if __name__ == "__main__":
     ui.setupUi(MainWindow)
     MainWindow.show()
     init_GPIO()
+    global LED_state
+    LED_state=False
     #os.system('matchbox-keyboard')
     sys.exit(app.exec_())
 
