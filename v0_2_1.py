@@ -10,8 +10,6 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from time import strftime, gmtime
 import sys,os
 import RPi.GPIO as GPIO
-global LED_state
-LED_state=False
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -143,15 +141,17 @@ def acquire_image(current_time):
 def toggle_LED_wrapper():
     # wrapper for ToggleLED radio button
     # Calls toggle_LED
-    toggle_LED()
-
-def toggle_LED():
+    global LED_state
     LED_state = not LED_state
+    toggle_LED(LED_state)
+
+def toggle_LED(LED_state):
     GPIO.output(12, LED_state)
 
 def init_GPIO():
     GPIO.setmode(GPIO.BOARD)
     GPIO.setup(12,GPIO.OUT)
+    print("GPIO initiated")
     
 if __name__ == "__main__":
     import sys
@@ -161,6 +161,6 @@ if __name__ == "__main__":
     ui.setupUi(MainWindow)
     MainWindow.show()
     init_GPIO()
+    LED_state=False     # LED begins off
     #os.system('matchbox-keyboard')
     sys.exit(app.exec_())
-
