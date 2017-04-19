@@ -9,6 +9,7 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from time import strftime, gmtime
 import sys,os
+import RPi.GPIO as GPIO
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -142,8 +143,14 @@ def toggle_LED_wrapper():
     # Calls toggle_LED
     toggle_LED()
 
-def toggle_LED():
-    print("Toggling")
+def toggle_LED(LED):
+    LED_state = not LED_state
+    GPIO.output(LED, LED_state)
+
+def init_GPIO():
+    GPIO.setmode(GPIO.BOARD)
+    GPIO.setup(12,GPIO.OUT)
+    LED_state=False
     
 if __name__ == "__main__":
     import sys
@@ -152,6 +159,7 @@ if __name__ == "__main__":
     ui = Ui_MainWindow()
     ui.setupUi(MainWindow)
     MainWindow.show()
+    init_GPIO()
     #os.system('matchbox-keyboard')
     sys.exit(app.exec_())
 
