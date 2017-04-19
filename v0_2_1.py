@@ -10,6 +10,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from time import strftime, gmtime
 import sys,os
 import RPi.GPIO as GPIO
+global LED_state
+LED_state=False
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -159,8 +161,6 @@ if __name__ == "__main__":
     ui.setupUi(MainWindow)
     MainWindow.show()
     init_GPIO()
-    global LED_state
-    LED_state=False
     #os.system('matchbox-keyboard')
     sys.exit(app.exec_())
 
