@@ -9,6 +9,7 @@
 
 import smbus
 import time
+from numpy import mean, sqrt, square, arange
 
 bus=smbus.SMBus(1)
 
@@ -72,7 +73,33 @@ def display_data(block):
     IR=(int(block[0],16)<<8)|(int(block[1],16))
     RED=(int(block[2],16)<<8)|(int(block[3],16))
     print("IR: "+str(IR)+" || RED: "+str(RED))
-    
+
+def RMS(foo):
+    # Takes list or numpy array
+    return sqrt(mean(square(foo)))
+
+def mean(foo):
+    # Takes list or numpy array
+    return sum(foo)/len(foo)
+
+def spo2_conversion(IR_list,RED_list):
+    # %SPO2 = 110 - 25*R
+    # R = (ACrms of Red / DC of red) / (ACrms of IR / DC of IR)
+
+    # Trying to calculate DC offset by just using mean of pulse wave data 
+    IR_DC=mean(IR_list)
+    RED_DC=mean(RED_list)
+
+    # Removing DC offset in preparation for the AC RMS calculation
+    IR_ac=[i - IR_DC for i in IR_list]
+    RED_ac=[i - RED_DC for i in RED_list]
+
+    IR_rms=RMS(IR_ac)
+    RED_rms=RMS(RED_ac) 
+
+    R=(RED_rms/RED_DC)/(IR_rms/IR_DC)
+    return 110-(25*R)
+
 #Configuration
 print("Initializing . . . ")
 mode_enable(Reset)
@@ -82,32 +109,34 @@ LED_config(0b0011,0b0011) # Testing, 11 mA for both LEDs
 
 #Reading Data
 print('\n')
-#count=0
-f=open("test_data.txt","w")
+IR_list=[]      # Windowed data for IR and RED values
+RED_list=[]
+count=0
 try:
     while True:  
         #Streaming data points, use CTRL-C on keyboard to stop
-
         temp1=request_reading(FIFO_Write_Pointer)
         temp2=request_reading(FIFO_Read_Pointer)
 
         while temp1 != temp2:
             block=Read_FIFO()
-##            count=count+1
-##
-##            if count%50==0:
-##                display_data(block)
-            
-            IR=(int(block[0],16)<<8)|(int(block[1],16))
-            RED=(int(block[2],16)<<8)|(int(block[3],16))
 
-            f.write("%d,%d,"%(IR,RED))
+            IR_list.append((int(block[0],16)<<8)|(int(block[1],16)))
+            RED_list.append((int(block[2],16)<<8)|(int(block[3],16))) 
             
+            if len(IR_list) == 15:
+                # 15 is good window length based on testing in spo2-filtering.py with median filter
+                spo2_value=spo2_conversion(IR_list,RED_list)
+                IR_list.pop(0)
+                RED_list.pop(0)
+
             temp1=request_reading(FIFO_Write_Pointer)
             temp2=request_reading(FIFO_Read_Pointer)
+            
+            if count%50==0:
+                print spo2_value
           
 except KeyboardInterrupt:
-    f.close()
     print("\nInterrupted")
     mode_enable(Reset) 
 
