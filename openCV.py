@@ -7,7 +7,7 @@ import cv2
 
 camera = PiCamera()
 camera.resolution = (640, 480)
-camera.framerate = 32
+camera.framerate = 40
 rawCapture = PiRGBArray(camera, size = (640, 480))
 
 time.sleep(0.1)
@@ -15,6 +15,8 @@ time.sleep(0.1)
 #obtain camera input array
 for frame in camera.capture_continuous(rawCapture, format = "bgr", use_video_port = True):
     image_preview = frame.array
+    #flip image over x axis
+    image_preview = cv2.flip(image_preview, -1)
 
     #generate preview window
     cv2.imshow("Frame", image_preview)
